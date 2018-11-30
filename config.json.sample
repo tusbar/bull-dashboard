@@ -1,0 +1,12 @@
+{
+  "queues": [
+    {
+      "prefix": "myapp",
+      "redisUrl": "redis://localhost:6379",
+      "names": [
+        "heavy-job-1",
+        "heavy-job-2"
+      ]
+    }
+  ]
+}
