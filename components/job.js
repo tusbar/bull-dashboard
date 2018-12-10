@@ -3,16 +3,16 @@ import React, {useState} from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
-import Grid from '@material-ui/core/Grid'
 import CardHeader from '@material-ui/core/CardHeader'
 import CardContent from '@material-ui/core/CardContent'
 import Collapse from '@material-ui/core/Collapse'
 import Avatar from '@material-ui/core/Avatar'
 import Typography from '@material-ui/core/Typography'
+import red from '@material-ui/core/colors/red'
 import blue from '@material-ui/core/colors/blue'
 import LinearProgress from '@material-ui/core/LinearProgress'
-
-import CodeBlock from './code-block'
+import {Prism} from 'react-syntax-highlighter'
+import {atomDark} from 'react-syntax-highlighter/dist/styles/prism'
 
 const styles = theme => ({
   card: {
@@ -23,6 +23,9 @@ const styles = theme => ({
   },
   actions: {
     display: 'flex'
+  },
+  code: {
+    fontSize: 12
   },
   expand: {
     transform: 'rotate(0deg)',
@@ -39,12 +42,15 @@ const styles = theme => ({
   avatar: {
     backgroundColor: blue[500]
   },
+  'avatar.failed': {
+    backgroundColor: red[500]
+  },
   overflow: {
     overflow: 'auto'
   }
 })
 
-const Job = React.memo(({classes, job}) => {
+const Job = React.memo(({classes, job, status}) => {
   const [expanded, setExpanded] = useState(false)
 
   const onExpand = () => {
@@ -58,7 +64,7 @@ const Job = React.memo(({classes, job}) => {
       <CardActionArea disableRipple onClick={onExpand}>
         <CardHeader
           avatar={
-            <Avatar className={classes.avatar}>
+            <Avatar className={classes[`avatar.${status}`] || classes.avatar}>
               J
             </Avatar>
           }
@@ -74,28 +80,32 @@ const Job = React.memo(({classes, job}) => {
       </CardActionArea>
       <Collapse in={expanded} timeout={0}>
         <CardContent>
-          <Grid container spacing={16}>
-            <Grid item xs={hasStackTraces ? 4 : 6} className={classes.overflow}>
-              {job.data && (
-                <>
-                  <Typography>Data:</Typography>
-                  <CodeBlock>
-                    {JSON.stringify(job.data, null, 2)}
-                  </CodeBlock>
-                </>
-              )}
-            </Grid>
-            {hasStackTraces && (
-              <Grid item xs={8} className={classes.overflow}>
-                <Typography>Stacktraces:</Typography>
-                {job.stacktrace.map((stack, id) => ( // eslint-disable-next-line react/no-array-index-key
-                  <CodeBlock key={id} component='pre'>
-                    {job.stacktrace.join('\n')}
-                  </CodeBlock>
-                ))}
-              </Grid>
-            )}
-          </Grid>
+          {job.data && (
+            <>
+              <Typography>Data:</Typography>
+              <Prism language='json' style={atomDark} className={classes.code}>
+                {JSON.stringify(job.data, null, 2)}
+              </Prism>
+            </>
+          )}
+          {job.opts && (
+            <>
+              <Typography>Options:</Typography>
+              <Prism language='json' style={atomDark} className={classes.code}>
+                {JSON.stringify(job.opts, null, 2)}
+              </Prism>
+            </>
+          )}
+          {hasStackTraces && (
+            <>
+              <Typography>Errors:</Typography>
+              {job.stacktrace.map((stack, id) => ( // eslint-disable-next-line react/no-array-index-key
+                <Prism key={id} style={atomDark} className={classes.code}>
+                  {job.stacktrace.join('\n')}
+                </Prism>
+              ))}
+            </>
+          )}
         </CardContent>
       </Collapse>
       {job.progress > 0 && (

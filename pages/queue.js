@@ -96,7 +96,7 @@ const QueuePage = ({classes, initialQueue, initialParams}) => {
       {queue.jobs && (
         <div>
           {queue.jobs.map(job => (
-            <Job key={job.id} job={job} />
+            <Job key={job.id} job={job} status={params.status} />
           ))}
         </div>
       )}
